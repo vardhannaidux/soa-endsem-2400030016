@@ -1,51 +1,48 @@
 
-name: microservices-deployment
+name: artstudio
 
 services:
-
   postgresdb:
     image: postgres:16-alpine
-    container_name: postgresdb
-    restart: unless-stopped
+    container_name: postgres-db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: docker
-      POSTGRES_DB: soa-endexam-2400030016
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: klustudentdb
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d soa-endexam-2400030016"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d klustudentdb"]
       interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 10s
     networks:
-      - microservices-network
+      - artstudio-network
 
-  art-studio-service:
-    image: docker-art-studio-2400030016:latest
+  backend:
+    image: jayanavardhannaidu/artstudio-service:latest
     build:
-      context: ./ArtStudio
+      context: ./ArtStudioService
       dockerfile: Dockerfile
-    container_name: art-studio-service
-    ports:
-      - "8010:8010"
+    container_name: artstudio-backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5432/soa-endexam-2400030016
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5432/klustudentdb
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: docker
+      SPRING_DATASOURCE_PASSWORD: postgres
+    ports:
+      - "8081:8081"
     depends_on:
       postgresdb:
         condition: service_healthy
-    restart: unless-stopped
+    restart: on-failure
     networks:
-      - microservices-network
+      - artstudio-network
 
 volumes:
   postgres_data:
 
 networks:
-  microservices-network:
+  artstudio-network:
     driver: bridge

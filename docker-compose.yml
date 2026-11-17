@@ -24,12 +24,12 @@ services:
     networks:
       - microservices-network
 
-  tour-package-service:
-    image: docker-endexam-2400030016:latest
+  art-studio-service:
+    image: docker-art-studio-2400030016:latest
     build:
-      context: ./TourPackageService
+      context: ./ArtStudio
       dockerfile: Dockerfile
-    container_name: tour-package-service
+    container_name: art-studio-service
     ports:
       - "8010:8010"
     environment:
